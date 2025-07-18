@@ -184,23 +184,7 @@ cursor-ppt-presentation/
 - 🔗 **项目地址**：[GitHub Repository](https://github.com/KinGao294/cursor-meetup-ppt-202506)
 - 🐛 **问题反馈**：[Issues](https://github.com/KinGao294/cursor-meetup-ppt-202506/issues)
 
-## 🌟 加入 Cursor 创作革命
 
-如果这个项目让你看到了 Cursor 在 PPT 制作领域的无限可能，请：
-
-⭐ **给个 Star** - 支持更多 Cursor 创作案例
-🔄 **分享项目** - 让更多人了解 Cursor 的强大
-💡 **尝试创作** - 用 Cursor 制作你的下一个 PPT
-📢 **反馈建议** - 帮助我们持续改进
-
-## 🎯 下一个 Cursor 创作案例
-
-正在准备中的项目：
-- 📊 **用 Cursor 制作炫酷的数据展示大屏**
-- 🎮 **用 Cursor 开发好玩的互动小游戏**
-- 📱 **用 Cursor 构建实用的手机应用**
-
-关注我们，不错过任何 Cursor 创作的精彩案例！
 
 ---
 
