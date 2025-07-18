@@ -33,12 +33,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/cursor-ppt-presentation.git"
+    "url": "https://github.com/KinGao294/cursor-meetup-ppt-202506.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/cursor-ppt-presentation/issues"
+    "url": "https://github.com/KinGao294/cursor-meetup-ppt-202506/issues"
   },
-  "homepage": "https://github.com/yourusername/cursor-ppt-presentation#readme",
+  "homepage": "https://github.com/KinGao294/cursor-meetup-ppt-202506#readme",
   "engines": {
     "node": ">=14.0.0"
   },

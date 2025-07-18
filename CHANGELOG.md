@@ -118,5 +118,5 @@
 - **安全** - 安全性修复
 
 ### 链接格式
-- [Unreleased]: https://github.com/yourusername/cursor-ppt-presentation/compare/v1.0.0...HEAD
-- [1.0.0]: https://github.com/yourusername/cursor-ppt-presentation/releases/tag/v1.0.0 
+- [Unreleased]: https://github.com/KinGao294/cursor-meetup-ppt-202506/compare/v1.0.0...HEAD
+- [1.0.0]: https://github.com/KinGao294/cursor-meetup-ppt-202506/releases/tag/v1.0.0 

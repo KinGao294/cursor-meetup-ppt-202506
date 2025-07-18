@@ -1,4 +1,4 @@
-# 🚀 Cursor PPT - 用最强AI工具制作的交互式演示文稿
+# 🚀 Cursor PPT - 用超强AI Agent工具制作的交互式演示文稿
 
 > **Cursor 才是制作 PPT 最强的 AI 工具！**
 > 
@@ -15,7 +15,6 @@
 - 💡 **突破模板限制**：不用被现成模板束缚，任何创意都能实现
 - 🔧 **完全个性化**：从配色到布局，从动画到交互，完全按你的想法定制
 - ⚡ **省时省力**：AI 帮你快速实现想法，避免反复调整格式
-- 🎯 **专业级体验**：可以像网页一样编辑，支持手机查看，还能快捷键操作
 
 ## 📋 本项目特色功能（对比传统PPT工具的优势）
 
@@ -25,7 +24,6 @@
 - 📱 **手机电脑都能用** - 手机上也能完美显示，不像PPT经常格式乱掉
 - 🔧 **一键全屏演示** - 支持全屏播放、居中展示，演示效果更专业
 - 💾 **永不丢失内容** - 自动保存你的修改，不用担心忘记保存或文件损坏
-- ⌨️ **快捷键超好用** - 键盘操作比鼠标快多了，演示时更流畅
 
 💪 **传统PPT工具做不到的事情，用Cursor轻松搞定！告别模板限制，释放创意无限可能！**
 
@@ -183,8 +181,8 @@ cursor-ppt-presentation/
 - 💬 **微信**：A55555555557
 - 🎯 **身份**：Cursor 官方认证大使 & 10万粉UP主
 - 📧 **合作咨询**：Cursor 企业培训、AI 创作工作坊
-- 🔗 **项目地址**：[GitHub Repository](https://github.com/yourusername/cursor-ppt-presentation)
-- 🐛 **问题反馈**：[Issues](https://github.com/yourusername/cursor-ppt-presentation/issues)
+- 🔗 **项目地址**：[GitHub Repository](https://github.com/KinGao294/cursor-meetup-ppt-202506)
+- 🐛 **问题反馈**：[Issues](https://github.com/KinGao294/cursor-meetup-ppt-202506/issues)
 
 ## 🌟 加入 Cursor 创作革命
 

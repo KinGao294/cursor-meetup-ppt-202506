@@ -6,7 +6,7 @@
 
 ### 报告问题
 如果您发现了 bug 或有功能建议，请：
-1. 在 [Issues](https://github.com/yourusername/cursor-ppt-presentation/issues) 中搜索是否已有相关问题
+1. 在 [Issues](https://github.com/KinGao294/cursor-meetup-ppt-202506/issues) 中搜索是否已有相关问题
 2. 如果没有，创建一个新的 Issue，并详细描述：
    - 问题的详细描述
    - 复现步骤
@@ -18,7 +18,7 @@
 ### 提交代码
 1. **Fork 项目**
    ```bash
-   git fork https://github.com/yourusername/cursor-ppt-presentation.git
+   git fork https://github.com/KinGao294/cursor-meetup-ppt-202506.git
    ```
 
 2. **创建分支**
@@ -168,7 +168,7 @@ cursor-ppt-presentation/
 ## 🆘 获取帮助
 
 如果您在贡献过程中遇到问题：
-1. 查看项目的 [Issues](https://github.com/yourusername/cursor-ppt-presentation/issues)
+1. 查看项目的 [Issues](https://github.com/KinGao294/cursor-meetup-ppt-202506/issues)
 2. 查看 [README.md](README.md) 文档
 3. 在 Issue 中提问
 4. 联系维护者：微信 A55555555557
