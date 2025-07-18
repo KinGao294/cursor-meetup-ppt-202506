@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用 Cursor 赋能视频创作 - 可编辑版</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+            line-height: 1.6;
+        }
+
+        /* 图片插入功能 */
+        .image-upload-btn {
+            background: #feca57;
+            color: #0a0a0a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .image-upload-btn:hover {
+            background: #ff9ff3;
+            transform: scale(1.05);
+        }
+
+        .inserted-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 2px solid #333;
+            transition: all 0.3s ease;
+        }
+
+        .inserted-image:hover {
+            border-color: #00d4ff;
+            transform: scale(1.02);
+        }
+
+        .edit-mode .inserted-image {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .edit-mode .inserted-image::after {
+            content: '🖼️ 点击替换';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .edit-mode .inserted-image:hover::after {
+            opacity: 1;
+        }
+
+        /* 删除按钮样式 */
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        /* 可删除元素样式 */
+        .deletable {
+            position: relative;
+        }
+
+        .edit-mode .deletable:hover .delete-btn {
+            display: flex;
+        }
+
+        .edit-mode .deletable:hover {
+            outline: 2px dashed #ff6b6b;
+            outline-offset: 2px;
+        }
+
+        /* 居中显示功能 */
+        .center-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .center-content.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .center-window {
+            background: #1a1a1a;
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+            position: relative;
+        }
+
+        .center-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2001;
+        }
+
+        /* 控制面板样式 */
+        .control-panel {
+            position: fixed;
+            bottom: 80px;
+            right: 30px;
+            z-index: 1500;
+            background: rgba(26, 26, 26, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .control-panel.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .control-btn {
+            display: block;
+            width: 100%;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #00d4ff;
+            color: #0a0a0a;
+            border-color: #00d4ff;
+        }
+
+        /* 编辑模式控制 */
+        .edit-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .edit-controls.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .edit-toggle {
+            background: #00d4ff;
+            color: #0a0a0a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .edit-toggle:hover {
+            background: #00b8d4;
+            transform: scale(1.05);
+        }
+
+        .edit-toggle.active {
+            background: #00ff88;
+        }
+
+        /* 可编辑元素样式 */
+        [contenteditable="true"] {
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode [contenteditable="true"]:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin: -2px -4px;
+        }
+
+        .edit-mode [contenteditable="true"]:focus {
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin: -2px -4px;
+            box-shadow: 0 0 0 2px #00d4ff;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .slide {
+            display: none;
+            padding: 80px 60px;
+            height: 100vh;
+            position: relative;
+            background: #0a0a0a;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        /* 代码风格的装饰边框 */
+        .code-border {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+        }
+
+        /* 幻灯片内容区域 */
+        .slide-content {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide h1 {
+            font-size: 3.2em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        .slide h2 {
+            font-size: 1.5em;
+            color: #888;
+            margin-bottom: 40px;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .slide h3 {
+            font-size: 1.2em;
+            color: #666;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        /* Cursor 风格的高亮 */
+        .cursor-highlight {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0 8px;
+            border-radius: 4px;
+        }
+
+        .accent-text {
+            color: #00ff88;
+        }
+
+        .warning-text {
+            color: #ff6b6b;
+        }
+
+        .success-text {
+            color: #00ff88;
+        }
+
+        .pride-text {
+            color: #feca57;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        /* 互动问题样式 */
+        .interaction-container {
+            background: #1a1a1a;
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 50px;
+            margin: 40px 0;
+            text-align: center;
+            max-width: 900px;
+            position: relative;
+        }
+
+        .interaction-container::before {
+            content: '✋';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            background: #0a0a0a;
+            padding: 0 20px;
+        }
+
+        .interaction-question {
+            font-size: 2.2em;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        .interaction-subtitle {
+            font-size: 1.2em;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* Tab 特效样式 */
+        .tab-demo {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+        }
+
+        .tab-hint {
+            color: #888;
+            font-size: 0.8em;
+            margin-bottom: 15px;
+        }
+
+        .tab-animation {
+            color: #00ff88;
+            font-size: 1em;
+            position: relative;
+        }
+
+        .cursor-blink {
+            animation: blink 1s infinite;
+            color: #00d4ff;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* 终端风格的内容容器 */
+        .terminal-window {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+            margin-right: 15px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        /* 数据统计样式 - 垂直居中版 */
+        .stats-container {
+            background: #1a1a1a;
+            border: 1px solid #ff6b6b;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stats-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stats-number {
+            background: #ff6b6b;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .stats-description {
+            color: #ccc;
+            font-size: 0.85em;
+            line-height: 1.3;
+        }
+
+        .stats-item:last-child .stats-number {
+            background: #00ff88;
+        }
+
+        /* 议程布局 */
+        .agenda-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 50px;
+        }
+
+        .agenda-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 30px 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agenda-card:hover {
+            border-color: #00d4ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+        }
+
+        .agenda-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+        }
+
+        .agenda-icon {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .agenda-title {
+            font-size: 1.1em;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .agenda-subtitle {
+            font-size: 0.9em;
+            color: #888;
+            font-weight: 400;
+        }
+
+        /* 痛点布局 */
+        .pain-points-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 50px;
+        }
+
+        .pain-point-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 35px 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            text-align: center;
+        }
+
+        .pain-point-card:hover {
+            border-color: #ff6b6b;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.1);
+        }
+
+        .pain-point-card:nth-child(2):hover {
+            border-color: #feca57;
+            box-shadow: 0 10px 30px rgba(254, 202, 87, 0.1);
+        }
+
+        .pain-point-card:nth-child(3):hover {
+            border-color: #48dbfb;
+            box-shadow: 0 10px 30px rgba(72, 219, 251, 0.1);
+        }
+
+        .pain-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .pain-title {
+            font-size: 1.2em;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .pain-description {
+            font-size: 0.95em;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        /* 流程图样式 */
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px 15px;
+            text-align: center;
+            min-width: 120px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step.highlighted {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00d4ff;
+            font-size: 1.2em;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .flow-icon {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .flow-title {
+            font-size: 0.8em;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* 对比布局 */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 40px;
+        }
+
+        .comparison-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .comparison-card.before {
+            border-color: #ff6b6b;
+        }
+
+        .comparison-card.after {
+            border-color: #00ff88;
+        }
+
+        .comparison-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .comparison-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .comparison-title {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .comparison-list {
+            list-style: none;
+        }
+
+        .comparison-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            color: #888;
+        }
+
+        .comparison-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #00d4ff;
+        }
+
+        /* 场景卡片 */
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 40px;
+        }
+
+        .scenario-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 25px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .scenario-card:hover {
+            border-color: #00d4ff;
+            transform: translateY(-5px);
+        }
+
+        .scenario-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* 角色信息卡片 */
+        .role-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            max-width: 900px;
+            position: relative;
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #feca57, #00ff88);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .role-title {
+            color: #00d4ff;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .role-list {
+            list-style: none;
+            color: #ccc;
+        }
+
+        .role-list li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .role-list li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+        }
+
+        /* 代码块样式 */
+        .code-block {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: #00ff88;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        /* 声明框 */
+        .disclaimer-box {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+
+        .disclaimer-title {
+            color: #ff6b6b;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .disclaimer-content {
+            color: #ccc;
+            line-height: 1.5;
+            font-size: 1em;
+        }
+
+        .quote-highlight {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* 金句样式 */
+        .quote-container {
+            background: #1a1a1a;
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+            position: relative;
+            max-width: 800px;
+        }
+
+        .quote-container::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4em;
+            color: #00d4ff;
+            line-height: 1;
+        }
+
+        .quote-text {
+            font-size: 1.8em;
+            color: #ffffff;
+            font-weight: 600;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .contact-info {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .contact-title {
+            color: #00d4ff;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .wechat-id {
+            color: #00ff88;
+            font-size: 1.1em;
+            font-weight: 600;
+            background: rgba(0, 255, 136, 0.1);
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* 二维码占位区域 */
+        .qr-placeholder {
+            background: #1a1a1a;
+            border: 2px dashed #333;
+            border-radius: 8px;
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9em;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .qr-placeholder:hover {
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .edit-mode .qr-placeholder:hover {
+            border-color: #feca57;
+            color: #feca57;
+        }
+
+        /* 导航和状态栏 */
+        .navigation {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            color: #888;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-btn:hover {
+            background: #333;
+            color: #00d4ff;
+            border-color: #00d4ff;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            color: #666;
+            font-size: 0.9em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .slide-number::before {
+            content: '> ';
+            color: #00d4ff;
+        }
+
+        /* 隐藏默认文件输入 */
+        #imageUpload {
+            display: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .agenda-grid, .pain-points-grid, .scenarios-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .comparison-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .slide h1 {
+                font-size: 2.2em;
+            }
+            
+            .slide {
+                padding: 40px 30px;
+            }
+
+            .flow-container {
+                flex-direction: column;
+            }
+
+            .flow-step::after {
+                display: none;
+            }
+
+            .stats-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 隐藏的文件输入 -->
+    <input type="file" id="imageUpload" accept="image/*">
+
+    <!-- 编辑控制器 -->
+    <div class="edit-controls" id="editControls">
+        <button class="edit-toggle" onclick="toggleEditMode()">📝 编辑模式</button>
+        <button class="image-upload-btn" onclick="insertImage()">🖼️ 插入图片</button>
+    </div>
+
+    <!-- 控制面板 -->
+    <div class="control-panel" id="controlPanel">
+        <button class="control-btn" onclick="centerCurrentSlide()">📍 居中当前页</button>
+        <button class="control-btn" onclick="toggleFullscreen()">🔳 全屏模式</button>
+        <button class="control-btn" onclick="resetView()">🔄 重置视图</button>
+        <button class="control-btn" onclick="exportPPT()">💾 导出内容</button>
+    </div>
+
+    <!-- 居中显示窗口 -->
+    <div class="center-content" id="centerContent">
+        <div class="center-window" id="centerWindow">
+            <button class="center-close" onclick="closeCenterView()">×</button>
+            <div id="centerSlideContent"></div>
+        </div>
+    </div>
+
+    <div class="slideshow-container">
+        <!-- 幻灯片1：开场 -->
+        <div class="slide active">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <div class="terminal-window deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="terminal-title">presentation.md</div>
+                    </div>
+                    <h1>用 <span class="cursor-highlight">Cursor</span> <span contenteditable="true">赋能视频创作</span></h1>
+                    <h2 class="pride-text">✨ <span contenteditable="true">10 万粉账号背后的终极秘籍</span> ✨</h2>
+                    <div class="role-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <div class="role-title">👋 <span contenteditable="true">自我介绍</span></div>
+                        <ul class="role-list">
+                            <li><span class="cursor-highlight" contenteditable="true">Cursor 官方认证大使</span></li>
+                            <li><span class="accent-text" contenteditable="true">Cursor 中文社区联合发起人</span></li>
+                            <li><span class="pride-text" contenteditable="true">10 万粉 UP 主</span></li>
+                            <li><span contenteditable="true">孵化过</span><span class="warning-text" contenteditable="true">百万粉</span><span contenteditable="true">短视频账号</span></li>
+                        </ul>
+                    </div>
+                    <div class="code-block deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        $ speaker: <span contenteditable="true">Kin</span><br>
+                        $ credentials: <span contenteditable="true">Cursor_Ambassador | Community_Founder | 100K_Creator</span>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">01/17</div>
+        </div>
+
+        <!-- 幻灯片2：互动问题 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <div class="interaction-container deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="interaction-question">
+                        <span contenteditable="true">想过做</span><span class="cursor-highlight" contenteditable="true">自己视频/IP 账号</span><span contenteditable="true">的同学<br>
+                        可以举下手</span>
+                    </div>
+                    <div class="interaction-subtitle">
+                        <span contenteditable="true">或者已经在做的，也举个手～</span>
+                    </div>
+                </div>
+                <div class="code-block deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    # <span contenteditable="true">看看今天有多少同路人</span><br>
+                    if (想做视频创作) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span contenteditable="true">今天的分享就是为你准备的！</span><br>
+                    }
+                </div>
+            </div>
+            <div class="slide-number">02/17</div>
+        </div>
+
+        <!-- 幻灯片3：分享大纲 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">今天的</span><span class="cursor-highlight" contenteditable="true">分享内容</span></h1>
+                <div class="agenda-grid">
+                    <div class="agenda-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">💔</span>
+                        <div class="agenda-title" contenteditable="true">三大痛点</div>
+                        <div class="agenda-subtitle" contenteditable="true">做 IP 视频账号的普遍困境</div>
+                    </div>
+                    <div class="agenda-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">🚀</span>
+                        <div class="agenda-title" contenteditable="true">创作方法论</div>
+                        <div class="agenda-subtitle" contenteditable="true">一套完整、科学的创作方法和流程 SOP 是怎样的？</div>
+                    </div>
+                    <div class="agenda-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">🎯</span>
+                        <div class="agenda-title" contenteditable="true">Cursor 应用场景</div>
+                        <div class="agenda-subtitle" contenteditable="true">五大 AI 赋能场景分享</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">03/17</div>
+        </div>
+
+        <!-- 幻灯片4：三大痛点 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">做</span><span class="cursor-highlight" contenteditable="true">自媒体视频账号</span><span contenteditable="true">的三大痛点</span></h1>
+                <h2><span contenteditable="true">你中了几个？</span></h2>
+                <div class="pain-points-grid">
+                    <div class="pain-point-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="pain-icon">😰</span>
+                        <div class="pain-title" contenteditable="true">拖延症</div>
+                        <div class="pain-description" contenteditable="true">觉得没时间<br>一直没开始</div>
+                    </div>
+                    <div class="pain-point-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="pain-icon">🤯</span>
+                        <div class="pain-title" contenteditable="true">无头苍蝇</div>
+                        <div class="pain-description" contenteditable="true">开始后乱学乱拍<br>没有章法</div>
+                    </div>
+                    <div class="pain-point-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="pain-icon">📉</span>
+                        <div class="pain-title" contenteditable="true">数据焦虑</div>
+                        <div class="pain-description" contenteditable="true">播放量不理想<br>就想放弃</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">04/17</div>
+        </div>
+
+        <!-- 幻灯片5：痛点根源 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">为什么会有这</span><span class="warning-text" contenteditable="true">三个痛点</span><span contenteditable="true">？</span></h1>
+                <div class="terminal-window deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="terminal-title">root_cause_analysis.py</div>
+                    </div>
+                    <div class="code-block deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        def analyze_pain_points():<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;root_cause = "<span contenteditable="true">缺乏科学、系统的创作方法论</span>"<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;problems = {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"拖延": "<span contenteditable="true">不知道从哪开始</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"乱学": "<span contenteditable="true">没有标准流程</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"焦虑": "<span contenteditable="true">缺乏分析框架</span>"<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return root_cause
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">05/17</div>
+        </div>
+
+        <!-- 幻灯片6：科学完整的创作流程 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">一套</span><span class="cursor-highlight" contenteditable="true">科学完整</span><span contenteditable="true">的创作流程是怎样的？</span></h1>
+                <div class="flow-container">
+                    <div class="flow-step highlighted deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">🎯</span>
+                        <div class="flow-title" contenteditable="true">选题</div>
+                    </div>
+                    <div class="flow-step highlighted deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">📝</span>
+                        <div class="flow-title" contenteditable="true">大纲</div>
+                    </div>
+                    <div class="flow-step highlighted deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">✍️</span>
+                        <div class="flow-title" contenteditable="true">文案</div>
+                    </div>
+                    <div class="flow-step deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">🎬</span>
+                        <div class="flow-title" contenteditable="true">拍摄</div>
+                    </div>
+                    <div class="flow-step deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">✂️</span>
+                        <div class="flow-title" contenteditable="true">剪辑</div>
+                    </div>
+                    <div class="flow-step highlighted deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">🎨</span>
+                        <div class="flow-title" contenteditable="true">封面标题</div>
+                    </div>
+                    <div class="flow-step deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">📱</span>
+                        <div class="flow-title" contenteditable="true">发布运营</div>
+                    </div>
+                    <div class="flow-step highlighted deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">📊</span>
+                        <div class="flow-title" contenteditable="true">复盘迭代</div>
+                    </div>
+                </div>
+                <div class="code-block deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <span class="cursor-highlight"># <span contenteditable="true">Cursor 能起作用的 5 个环节已高亮显示</span></span><br>
+                    # <span contenteditable="true">拍摄、剪辑、发布运营这 3 个环节需要人工完成</span>
+                </div>
+            </div>
+            <div class="slide-number">06/17</div>
+        </div>
+
+        <!-- 幻灯片7：现实声明 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">先说句</span><span class="warning-text" contenteditable="true">实话</span></h1>
+                
+                <div class="disclaimer-box deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="disclaimer-title">⚠️ <span contenteditable="true">现实声明</span></div>
+                    <div class="disclaimer-content">
+                        <p><span contenteditable="true">做视频/IP</span> <span class="warning-text" contenteditable="true">100 个里面有 99 个会失败</span></p>
+                        <p><span contenteditable="true">15分钟的分享，没办法解决创作的所有痛苦，你依旧可能会很痛苦，依旧有可能做不成</span></p>
+                        <p><span class="quote-highlight" contenteditable="true">内容创作本质上是个概率问题，Cursor 和 AI 能做的，是显著提高你成功的概率，降低你试错的成本。这就足够了。</span></p>
+                    </div>
+                </div>
+
+                <div class="stats-container deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="stats-item">
+                        <div class="stats-number" contenteditable="true">100</div>
+                        <div class="stats-description" contenteditable="true">人想做自媒体账号</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-number" contenteditable="true">50</div>
+                        <div class="stats-description" contenteditable="true">人从未开始</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-number" contenteditable="true">40</div>
+                        <div class="stats-description" contenteditable="true">人会在一个月内放弃</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-number" contenteditable="true">9</div>
+                        <div class="stats-description" contenteditable="true">人坚持不到一年</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-number" contenteditable="true">1</div>
+                        <div class="stats-description" contenteditable="true">人成功起号</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">07/17</div>
+        </div>
+
+        <!-- 幻灯片8：五大应用场景总览 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span class="cursor-highlight" contenteditable="true">Cursor</span> <span contenteditable="true">能赋能视频创作的五大核心应用场景</span></h1>
+                <div class="scenarios-grid">
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">🎯</span>
+                        <div class="agenda-title" contenteditable="true">选题策划</div>
+                        <div class="agenda-subtitle" contenteditable="true">数据驱动找爆点</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">📝</span>
+                        <div class="agenda-title" contenteditable="true">大纲构建</div>
+                        <div class="agenda-subtitle" contenteditable="true">联网搜集，快速框架</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">✍️</span>
+                        <div class="agenda-title" contenteditable="true">脚本创作</div>
+                        <div class="agenda-subtitle" contenteditable="true">模仿爆款，青出于蓝</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">🎨</span>
+                        <div class="agenda-title" contenteditable="true">封面标题</div>
+                        <div class="agenda-subtitle" contenteditable="true">AI润色提升点击率</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">📊</span>
+                        <div class="agenda-title" contenteditable="true">数据复盘</div>
+                        <div class="agenda-subtitle" contenteditable="true">趋势分析优化决策</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">08/17</div>
+        </div>
+
+        <!-- 幻灯片9：场景一 - 选题策划 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">场景一：</span><span class="cursor-highlight" contenteditable="true">选题策划</span></h1>
+                <h2><span contenteditable="true">监控同行，洞察先机</span></h2>
+                <div class="terminal-window deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="terminal-title">topic_monitor.py</div>
+                    </div>
+                    <div class="code-block deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        # <span contenteditable="true">监控对标账号</span><br>
+                        competitors = {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"头部账号": "<span contenteditable="true">学习爆款模式</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"中部账号": "<span contenteditable="true">发现增长机会</span>", <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"尾部账号": "<span contenteditable="true">抓住新兴趋势</span>"<br>
+                        }<br>
+                        <br>
+                        # <span contenteditable="true">自动推送到邮箱</span><br>
+                        def daily_report():<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;send_email("<span contenteditable="true">今日热点分析.pdf</span>")
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">09/17</div>
+        </div>
+
+        <!-- 幻灯片10：选题效果对比 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">效果对比：从被动到</span><span class="accent-text" contenteditable="true">主动</span></h1>
+                <div class="comparison-container">
+                    <div class="comparison-card before deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <div class="comparison-header">
+                            <span class="comparison-icon warning-text">❌</span>
+                            <span class="comparison-title warning-text" contenteditable="true">以前</span>
+                        </div>
+                        <ul class="comparison-list">
+                            <li contenteditable="true">花2小时刷同行</li>
+                            <li contenteditable="true">容易漏掉重要信息</li>
+                            <li contenteditable="true">凭感觉判断趋势</li>
+                            <li contenteditable="true">选题命中率低</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-card after deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <div class="comparison-header">
+                            <span class="comparison-icon success-text">✅</span>
+                            <span class="comparison-title success-text" contenteditable="true">现在</span>
+                        </div>
+                        <ul class="comparison-list">
+                            <li contenteditable="true">每天5分钟看邮件</li>
+                            <li contenteditable="true">全赛道尽在掌握</li>
+                            <li contenteditable="true">数据驱动决策</li>
+                            <li contenteditable="true">系统化监控</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">10/17</div>
+        </div>
+
+        <!-- 幻灯片11：场景二 - 大纲构建 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">场景二：</span><span class="cursor-highlight" contenteditable="true">大纲构建</span></h1>
+                <h2><span contenteditable="true">联网搜集，快速成型</span></h2>
+                <div class="flow-container">
+                    <div class="flow-step deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">🌐</span>
+                        <div class="flow-title" contenteditable="true">联网搜集资料</div>
+                    </div>
+                    <div class="flow-step deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">🏗️</span>
+                        <div class="flow-title" contenteditable="true">构建专业框架</div>
+                    </div>
+                    <div class="flow-step deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="flow-icon">✅</span>
+                        <div class="flow-title" contenteditable="true">逻辑检查</div>
+                    </div>
+                </div>
+                <div class="code-block deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <span contenteditable="true">AI 可以联网快速搜集资料，构建出专业的内容框架，</span><br>
+                    <span contenteditable="true">还能检查逻辑确保内容流畅连贯。</span><br>
+                    <br>
+                    <span class="success-text" contenteditable="true">从手工整理资料 → AI智能构建</span>
+                </div>
+            </div>
+            <div class="slide-number">11/17</div>
+        </div>
+
+        <!-- 幻灯片12：场景三 - 脚本创作 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">场景三：</span><span class="cursor-highlight" contenteditable="true">脚本创作</span></h1>
+                <h2><span contenteditable="true">模仿爆款，青出于蓝</span></h2>
+                <div class="terminal-window deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="terminal-title">content_generator.py</div>
+                    </div>
+                    <div class="code-block deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        def generate_scripts(topic, outline):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;# <span contenteditable="true">模仿爆款结构，青出于蓝</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;platforms = {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"bilibili": "<span contenteditable="true">专业深度的长文案</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"xiaohongshu": "<span contenteditable="true">生活化的短文案</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"douyin": "<span contenteditable="true">节奏感的口播稿</span>"<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return multi_platform_scripts
+                    </div>
+                </div>
+                <div class="tab-demo deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="tab-hint"># <span contenteditable="true">人工在 Cursor 里编辑润色：</span></div>
+                    <div class="tab-animation">
+                        <span contenteditable="true">写到一半词穷了？</span><span class="cursor-blink">Tab Tab Tab</span> <span contenteditable="true">就有提示！</span><br>
+                        <span contenteditable="true">AI 助手随时待命，创意源源不断 ✨</span>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">12/17</div>
+        </div>
+
+        <!-- 幻灯片13：场景四 - 封面标题 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">场景四：</span><span class="cursor-highlight" contenteditable="true">封面标题</span></h1>
+                <h2><span contenteditable="true">AI润色，提升点击率</span></h2>
+                <div class="pain-points-grid">
+                    <div class="pain-point-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="pain-icon">🏷️</span>
+                        <div class="pain-title" contenteditable="true">批量生成标题</div>
+                        <div class="pain-description" contenteditable="true">多个吸引人的<br>标题版本</div>
+                    </div>
+                    <div class="pain-point-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="pain-icon">🎨</span>
+                        <div class="pain-title" contenteditable="true">封面设计建议</div>
+                        <div class="pain-description" contenteditable="true">元素搭配<br>视觉优化</div>
+                    </div>
+                    <div class="pain-point-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="pain-icon">📈</span>
+                        <div class="pain-title" contenteditable="true">数据驱动优化</div>
+                        <div class="pain-description" contenteditable="true">基于历史数据<br>提升点击率</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">13/17</div>
+        </div>
+
+        <!-- 幻灯片14：场景五 - 数据复盘 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">场景五：</span><span class="cursor-highlight" contenteditable="true">数据复盘</span></h1>
+                <h2><span contenteditable="true">趋势分析，优化决策</span></h2>
+                <div class="terminal-window deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="terminal-title">data_analysis.py</div>
+                    </div>
+                    <div class="code-block deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        def analyze_performance(excel_data):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;# <span contenteditable="true">导出平台数据到Excel</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;insights = ai.analyze_patterns(excel_data)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;# <span contenteditable="true">AI分析内容表现规律</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;trends = ai.predict_trends(insights)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;# <span contenteditable="true">生成优化建议</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return optimization_suggestions
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">14/17</div>
+        </div>
+
+        <!-- 幻灯片15：五大场景回顾 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span class="cursor-highlight" contenteditable="true">五大场景</span><span contenteditable="true">回顾</span></h1>
+                <div class="scenarios-grid">
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">🎯</span>
+                        <div class="agenda-title" contenteditable="true">选题策划</div>
+                        <div class="agenda-subtitle" contenteditable="true">监控同行，每日推送洞察</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">📝</span>
+                        <div class="agenda-title" contenteditable="true">大纲构建</div>
+                        <div class="agenda-subtitle" contenteditable="true">联网搜集，快速框架生成</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">✍️</span>
+                        <div class="agenda-title" contenteditable="true">脚本创作</div>
+                        <div class="agenda-subtitle" contenteditable="true">模仿爆款，青出于蓝</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">🎨</span>
+                        <div class="agenda-title" contenteditable="true">封面标题</div>
+                        <div class="agenda-subtitle" contenteditable="true">AI润色，提升点击率</div>
+                    </div>
+                    <div class="scenario-card deletable">
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <span class="agenda-icon">📊</span>
+                        <div class="agenda-title" contenteditable="true">数据复盘</div>
+                        <div class="agenda-subtitle" contenteditable="true">趋势分析，优化决策</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">15/17</div>
+        </div>
+
+        <!-- 幻灯片16：纳瓦尔杠杆理论 - 简化版 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <div class="quote-container deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="quote-text">
+                        <span contenteditable="true">纳瓦尔说过四种杠杆：<br>
+                        人力、资本、代码、媒体<br><br>
+                        AI时代，</span><span class="cursor-highlight" contenteditable="true">用AI做内容</span><br>
+                        <span contenteditable="true">就是最好的杠杆</span>
+                    </div>
+                </div>
+                
+                <div class="terminal-window deletable" style="margin-top: 20px; max-width: 700px;">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="terminal-title">leverage_evolution.py</div>
+                    </div>
+                    <div class="code-block">
+                        # <span contenteditable="true">四种杠杆的演进</span><br>
+                        leverage_evolution = {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"人力": "<span contenteditable="true">雇佣他人为你工作</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"资本": "<span contenteditable="true">让钱为你工作</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"代码": "<span contenteditable="true">让机器为你工作</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"媒体": "<span contenteditable="true">让内容为你工作</span>",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"AI": "<span contenteditable="true">让智能为你工作</span> ✨"<br>
+                        }<br>
+                        <br>
+                        <span class="success-text"># AI + 内容创作 = 终极杠杆</span>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">16/17</div>
+        </div>
+
+        <!-- 幻灯片17：联系方式与二维码 -->
+        <div class="slide">
+            <div class="code-border"></div>
+            <div class="slide-content">
+                <h1><span contenteditable="true">愿每个创作者都能</span><span class="cursor-highlight" contenteditable="true">掌握AI杠杆</span></h1>
+                
+                <div class="contact-info deletable">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="contact-title">📱 <span contenteditable="true">欢迎交流更多AI创作技巧</span></div>
+                    <div class="wechat-id"><span contenteditable="true">微信：A55555555557</span></div>
+                </div>
+
+                <div class="qr-placeholder deletable" onclick="insertQRCode()">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div>
+                        📱<br>
+                        <span contenteditable="true">点击插入二维码</span>
+                    </div>
+                </div>
+
+                <div class="terminal-window deletable" style="margin-top: 20px; max-width: 600px;">
+                    <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="terminal-title">final_message.py</div>
+                    </div>
+                    <div class="code-block">
+                        def farewell():<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;message = "<span contenteditable="true">在AI时代，让我们一起用智能杠杆撬动创作的无限可能</span>"<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;print(message)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return "<span contenteditable="true">Thank you! 🚀</span>"
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">17/17</div>
+        </div>
+
+        <!-- 导航按钮 -->
+        <div class="navigation">
+            <button class="nav-btn" onclick="changeSlide(-1)">‹</button>
+            <button class="nav-btn" onclick="changeSlide(1)">›</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        let editMode = false;
+        let isFullscreen = false;
+        let activeElement = null;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n >= totalSlides) currentSlide = 0;
+            if (n < 0) currentSlide = totalSlides - 1;
+            
+            slides[currentSlide].classList.add('active');
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const body = document.body;
+            const button = document.querySelector('.edit-toggle');
+            
+            if (editMode) {
+                body.classList.add('edit-mode');
+                button.classList.add('active');
+                button.textContent = '✅ 编辑中';
+            } else {
+                body.classList.remove('edit-mode');
+                button.classList.remove('active');
+                button.textContent = '📝 编辑模式';
+                saveContent();
+            }
+        }
+
+        // 删除元素功能
+        function deleteElement(deleteBtn) {
+            if (confirm('确定要删除这个模块吗？')) {
+                const element = deleteBtn.parentElement;
+                element.style.transition = 'all 0.3s ease';
+                element.style.opacity = '0';
+                element.style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    element.remove();
+                    saveContent();
+                }, 300);
+            }
+        }
+
+        // 图片插入功能
+        function insertImage() {
+            if (!editMode) {
+                alert('请先进入编辑模式');
+                return;
+            }
+            
+            const fileInput = document.getElementById('imageUpload');
+            fileInput.click();
+        }
+
+        // 二维码插入功能
+        function insertQRCode() {
+            if (!editMode) {
+                alert('请先进入编辑模式，然后点击插入二维码');
+                return;
+            }
+            
+            const fileInput = document.getElementById('imageUpload');
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const qrPlaceholder = document.querySelector('.qr-placeholder');
+                        qrPlaceholder.innerHTML = `
+                            <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                            <img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                        `;
+                        qrPlaceholder.onclick = function() {
+                            if (editMode) {
+                                insertQRCode();
+                            }
+                        };
+                        saveContent();
+                    };
+                    reader.readAsDataURL(file);
+                }
+                // 重置事件处理器
+                fileInput.onchange = document.getElementById('imageUpload').onchange;
+            };
+            fileInput.click();
+        }
+
+        // 处理图片上传
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'inserted-image';
+                    img.onclick = function() {
+                        if (editMode) {
+                            replaceImage(this);
+                        }
+                    };
+                    
+                    // 如果有焦点元素，插入到其中；否则插入到当前幻灯片
+                    if (activeElement && activeElement.contentEditable === 'true') {
+                        activeElement.appendChild(img);
+                    } else {
+                        const currentSlideElement = slides[currentSlide];
+                        currentSlideElement.appendChild(img);
+                    }
+                    
+                    saveContent();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function replaceImage(imgElement) {
+            const fileInput = document.getElementById('imageUpload');
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imgElement.src = e.target.result;
+                        saveContent();
+                    };
+                    reader.readAsDataURL(file);
+                }
+                // 重置事件处理器
+                fileInput.onchange = document.getElementById('imageUpload').onchange;
+            };
+            fileInput.click();
+        }
+
+        // 跟踪活动元素
+        document.addEventListener('focusin', function(e) {
+            if (e.target.contentEditable === 'true') {
+                activeElement = e.target;
+            }
+        });
+
+        document.addEventListener('focusout', function(e) {
+            if (e.target === activeElement) {
+                activeElement = null;
+            }
+        });
+
+        // 居中当前幻灯片
+        function centerCurrentSlide() {
+            const currentSlideElement = slides[currentSlide];
+            const centerContent = document.getElementById('centerContent');
+            const centerSlideContent = document.getElementById('centerSlideContent');
+            
+            // 复制当前幻灯片内容到居中窗口
+            centerSlideContent.innerHTML = currentSlideElement.innerHTML;
+            
+            // 显示居中窗口
+            centerContent.classList.add('active');
+        }
+
+        // 关闭居中视图
+        function closeCenterView() {
+            const centerContent = document.getElementById('centerContent');
+            centerContent.classList.remove('active');
+        }
+
+        // 全屏模式
+        function toggleFullscreen() {
+            if (!isFullscreen) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                }
+                isFullscreen = true;
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                isFullscreen = false;
+            }
+        }
+
+        // 重置视图
+        function resetView() {
+            closeCenterView();
+            if (isFullscreen) {
+                toggleFullscreen();
+            }
+            showSlide(0);
+        }
+
+        // 导出内容
+        function exportPPT() {
+            const content = {
+                slides: [],
+                metadata: {
+                    title: "用 Cursor 赋能视频创作",
+                    author: "Kin",
+                    created: new Date().toISOString(),
+                    slideCount: totalSlides
+                }
+            };
+
+            slides.forEach((slide, index) => {
+                content.slides.push({
+                    index: index + 1,
+                    html: slide.innerHTML
+                });
+            });
+
+            const blob = new Blob([JSON.stringify(content, null, 2)], {
+                type: 'application/json'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cursor-ppt-export.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function saveContent() {
+            const content = {};
+            const editableElements = document.querySelectorAll('[contenteditable="true"]');
+            editableElements.forEach((el, index) => {
+                content[index] = el.innerHTML;
+            });
+            
+            // 保存图片
+            const images = document.querySelectorAll('.inserted-image');
+            const imageData = {};
+            images.forEach((img, index) => {
+                imageData[index] = {
+                    src: img.src,
+                    parentIndex: Array.from(document.querySelectorAll('*')).indexOf(img.parentElement)
+                };
+            });
+
+            // 保存二维码
+            const qrPlaceholder = document.querySelector('.qr-placeholder');
+            if (qrPlaceholder && qrPlaceholder.querySelector('img')) {
+                const qrImg = qrPlaceholder.querySelector('img');
+                localStorage.setItem('qrCode', qrImg.src);
+            }
+            
+            localStorage.setItem('pptContent', JSON.stringify(content));
+            localStorage.setItem('pptImages', JSON.stringify(imageData));
+            console.log('内容已保存到本地存储');
+        }
+
+        function loadContent() {
+            // 加载文本内容
+            const savedContent = localStorage.getItem('pptContent');
+            if (savedContent) {
+                const content = JSON.parse(savedContent);
+                const editableElements = document.querySelectorAll('[contenteditable="true"]');
+                editableElements.forEach((el, index) => {
+                    if (content[index]) {
+                        el.innerHTML = content[index];
+                    }
+                });
+            }
+
+            // 加载图片
+            const savedImages = localStorage.getItem('pptImages');
+            if (savedImages) {
+                const imageData = JSON.parse(savedImages);
+                Object.values(imageData).forEach(imgInfo => {
+                    const parentElement = document.querySelectorAll('*')[imgInfo.parentIndex];
+                    if (parentElement) {
+                        const img = document.createElement('img');
+                        img.src = imgInfo.src;
+                        img.className = 'inserted-image';
+                        img.onclick = function() {
+                            if (editMode) {
+                                replaceImage(this);
+                            }
+                        };
+                        parentElement.appendChild(img);
+                    }
+                });
+            }
+
+            // 加载二维码
+            const savedQR = localStorage.getItem('qrCode');
+            if (savedQR) {
+                const qrPlaceholder = document.querySelector('.qr-placeholder');
+                if (qrPlaceholder) {
+                    qrPlaceholder.innerHTML = `
+                        <button class="delete-btn" onclick="deleteElement(this)">×</button>
+                        <img src="${savedQR}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                    `;
+                    qrPlaceholder.onclick = function() {
+                        if (editMode) {
+                            insertQRCode();
+                        }
+                    };
+                }
+            }
+            
+            console.log('已加载保存的内容');
+        }
+
+        function showEditControls() {
+            const editControls = document.getElementById('editControls');
+            editControls.classList.add('visible');
+        }
+
+        function hideEditControls() {
+            const editControls = document.getElementById('editControls');
+            editControls.classList.remove('visible');
+        }
+
+        function showControlPanel() {
+            const controlPanel = document.getElementById('controlPanel');
+            controlPanel.classList.add('visible');
+        }
+
+        function hideControlPanel() {
+            const controlPanel = document.getElementById('controlPanel');
+            controlPanel.classList.remove('visible');
+        }
+
+        // 键盘导航和控制
+        document.addEventListener('keydown', function(event) {
+            // Command+I (Mac) 或 Ctrl+I (Windows) 显示编辑控制器
+            if ((event.metaKey || event.ctrlKey) && event.key === 'i') {
+                event.preventDefault();
+                showEditControls();
+                return;
+            }
+
+            // Command+K (Mac) 或 Ctrl+K (Windows) 显示控制面板
+            if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+                event.preventDefault();
+                showControlPanel();
+                return;
+            }
+
+            // 空格键居中当前页
+            if (event.key === ' ' && event.shiftKey) {
+                event.preventDefault();
+                centerCurrentSlide();
+                return;
+            }
+
+            // Command+Shift+I 插入图片
+            if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'I') {
+                event.preventDefault();
+                insertImage();
+                return;
+            }
+
+            // F11 全屏
+            if (event.key === 'F11') {
+                event.preventDefault();
+                toggleFullscreen();
+                return;
+            }
+
+            // ESC 关闭所有弹窗
+            if (event.key === 'Escape') {
+                hideEditControls();
+                hideControlPanel();
+                closeCenterView();
+                return;
+            }
+
+            if (!editMode) {
+                if (event.key === 'ArrowRight' || (event.key === ' ' && !event.shiftKey)) {
+                    changeSlide(1);
+                } else if (event.key === 'ArrowLeft') {
+                    changeSlide(-1);
+                }
+            }
+            
+            // Ctrl+S 保存
+            if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+                event.preventDefault();
+                saveContent();
+                alert('内容已保存！');
+            }
+        });
+
+        // 点击空白区域隐藏面板
+        document.addEventListener('click', function(event) {
+            const editControls = document.getElementById('editControls');
+            const controlPanel = document.getElementById('controlPanel');
+            
+            if (!editControls.contains(event.target)) {
+                hideEditControls();
+            }
+            
+            if (!controlPanel.contains(event.target)) {
+                hideControlPanel();
+            }
+        });
+
+        // 初始化
+        showSlide(currentSlide);
+        loadContent();
+
+        // 自动保存功能
+        setInterval(() => {
+            if (editMode) {
+                saveContent();
+            }
+        }, 30000);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,60 @@
+{
+  "name": "cursor-ppt-presentation",
+  "version": "1.0.0",
+  "description": "🚀 Cursor才是制作PPT最强的AI工具！北京Meetup实战案例，展示Cursor在PPT制作领域的无限可能。100%由Cursor协助完成的交互式演示文稿。",
+  "main": "cursor-ppt-presentation.html",
+  "scripts": {
+    "start": "npx serve . -p 8080",
+    "dev": "npx serve . -p 3000",
+    "build": "echo 'No build process needed for static HTML project'",
+    "preview": "open cursor-ppt-presentation.html",
+    "lint": "echo 'Linting HTML/CSS/JS files...'",
+    "test": "echo 'No tests specified' && exit 0"
+  },
+  "keywords": [
+    "ppt",
+    "presentation",
+    "slides",
+    "cursor",
+    "ai",
+    "video",
+    "content-creation",
+    "interactive",
+    "editable",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "author": {
+    "name": "Kin",
+    "email": "your-email@example.com",
+    "url": "https://github.com/yourusername"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/cursor-ppt-presentation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/cursor-ppt-presentation/issues"
+  },
+  "homepage": "https://github.com/yourusername/cursor-ppt-presentation#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ],
+  "devDependencies": {
+    "serve": "^14.0.0"
+  },
+  "files": [
+    "cursor-ppt-presentation.html",
+    "README.md",
+    "LICENSE",
+    "screenshots/"
+  ]
+} 
