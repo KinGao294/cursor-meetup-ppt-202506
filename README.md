@@ -48,25 +48,31 @@
 
 ## 📸 PPT 效果预览
 
-以下是PPT的部分页面效果（[查看完整17页截图](screenshots/slides/)）：
+### 🎯 如何查看PPT页面效果？
 
-### 开场页面
-![PPT开场](screenshots/slides/slide-01.png)
-*用Cursor赋能视频创作 - 北京Meetup现场演示*
+**方法1：直接运行PPT**
+- 双击 `cursor-ppt-presentation.html` 文件
+- 在浏览器中浏览所有17页内容
+- 体验完整的交互功能
 
-### 核心观点展示
-![三大痛点](screenshots/slides/slide-04.png)
-*分析做自媒体视频账号的三大痛点*
+**方法2：生成静态截图**
+- 运行 `capture-slides.js` 脚本
+- 自动生成所有页面的高清截图
+- 保存到 `screenshots/slides/` 文件夹
 
-### 解决方案流程
-![创作流程](screenshots/slides/slide-06.png)
-*展示科学完整的创作流程*
+### 📋 PPT页面内容概览
 
-### 实战应用场景
-![应用场景](screenshots/slides/slide-08.png)
-*Cursor能赋能视频创作的五大核心应用场景*
+| 页面 | 主要内容 | 亮点功能 |
+|------|----------|----------|
+| **第1页** | 🎤 开场 - 用Cursor赋能视频创作 | 炫酷的科技风主题 |
+| **第4页** | 📊 三大痛点 - 做自媒体视频账号的困境 | 问题分析可视化 |
+| **第6页** | 🔄 创作流程 - 科学完整的创作流程 | 流程图交互展示 |
+| **第8页** | 🎯 应用场景 - Cursor赋能视频创作的五大场景 | 核心价值展示 |
+| **第17页** | 📞 联系方式与二维码 | 完整联系信息 |
 
-> 💡 **提示**: 点击图片可以查看高清版本。所有17页截图都采用1920x1080分辨率，完美展示了Cursor制作PPT的专业效果。
+> 🚀 **一键生成截图**: 运行截图脚本后，这里将自动显示所有页面的高清预览图！  
+> 📖 **详细指南**: 查看 [SCREENSHOT_GUIDE.md](SCREENSHOT_GUIDE.md) 了解如何快速生成截图
+
 
 ## 🚀 快速开始
 
@@ -118,6 +124,7 @@ cursor-ppt-presentation/
 ├── CONTRIBUTING.md                 # 🤝 贡献指南 - 欢迎更多Cursor创作案例
 ├── package.json                    # 📦 项目配置
 ├── capture-slides.js               # 📸 自动截图脚本 - 批量生成PPT页面截图
+├── update-readme-with-screenshots.js # 🔄 README更新脚本 - 自动添加截图预览
 ├── .github/                        # 🐛 GitHub配置
 │   └── ISSUE_TEMPLATE/
 └── screenshots/                    # 📸 演示资源
