@@ -48,7 +48,7 @@
 
 ## 📸 PPT 效果预览
 
-以下是PPT的部分页面效果（[查看完整15页截图](screenshots/slides/)）：
+以下是PPT的部分页面效果（[查看完整17页截图](screenshots/slides/)）：
 
 ### 开场页面
 ![开场页面](screenshots/slides/slide-01.png)
@@ -69,7 +69,7 @@
 ### 📊 完整页面列表
 
 <details>
-<summary>📋 点击展开查看所有15页截图</summary>
+<summary>📋 点击展开查看所有17页截图</summary>
 
 | ![第1页](screenshots/slides/slide-01.png) |
 |:---:|
@@ -130,6 +130,14 @@
 | ![第15页](screenshots/slides/slide-15.png) |
 |:---:|
 | **第15页** - [slide-15.png](screenshots/slides/slide-15.png) |
+
+| ![第16页](screenshots/slides/slide-16.png) |
+|:---:|
+| **第16页** - [slide-16.png](screenshots/slides/slide-16.png) |
+
+| ![第17页](screenshots/slides/slide-17.png) |
+|:---:|
+| **第17页** - [slide-17.png](screenshots/slides/slide-17.png) |
 
 </details>
 
