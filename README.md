@@ -143,12 +143,12 @@
 
 > 💡 **提示**: 点击图片可以查看高清版本。所有截图都采用1920x1080分辨率，完美展示了Cursor制作PPT的专业效果。
 
-### 🎯 如何更新截图？
+### 🎯 截图说明
 
-如果您修改了PPT内容，可以：
-1. 运行 `capture-slides.js` 重新生成截图
-2. 运行 `node update-readme-with-screenshots.js` 更新README
-3. 提交更改：`git add . && git commit -m "📸 更新PPT截图" && git push`
+这些截图展示了：
+1. **北京Meetup现场演示** - 360+观众见证的真实案例
+2. **Cursor制作效果** - 完整的PPT制作成果展示
+3. **专业设计水准** - 1920x1080高清分辨率截图
 
 
 ## 🚀 快速开始
@@ -200,14 +200,12 @@ cursor-ppt-presentation/
 ├── CHANGELOG.md                    # 📝 版本记录 - 记录Cursor开发历程
 ├── CONTRIBUTING.md                 # 🤝 贡献指南 - 欢迎更多Cursor创作案例
 ├── package.json                    # 📦 项目配置
-├── capture-slides.js               # 📸 自动截图脚本 - 批量生成PPT页面截图
-├── update-readme-with-screenshots.js # 🔄 README更新脚本 - 自动添加截图预览
 ├── .github/                        # 🐛 GitHub配置
 │   └── ISSUE_TEMPLATE/
-└── screenshots/                    # 📸 演示资源
+└── screenshots/                    # 📸 PPT页面截图集合
     ├── README.md                   # 截图说明文档
-    └── slides/                     # PPT页面截图集合
-        ├── README.md               # 截图使用指南
+    └── slides/                     # 完整17页PPT截图
+        ├── README.md               # 截图使用说明
         ├── slide-01.png            # 第1页：开场
         ├── slide-02.png            # 第2页：互动问题
         ├── ...                     # 更多页面截图
