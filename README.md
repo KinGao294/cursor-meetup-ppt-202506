@@ -48,30 +48,99 @@
 
 ## 📸 PPT 效果预览
 
-### 🎯 如何查看PPT页面效果？
+以下是PPT的部分页面效果（[查看完整15页截图](screenshots/slides/)）：
 
-**方法1：直接运行PPT**
-- 双击 `cursor-ppt-presentation.html` 文件
-- 在浏览器中浏览所有17页内容
-- 体验完整的交互功能
+### 开场页面
+![开场页面](screenshots/slides/slide-01.png)
+*用Cursor赋能视频创作 - 北京Meetup现场演示*
 
-**方法2：生成静态截图**
-- 运行 `capture-slides.js` 脚本
-- 自动生成所有页面的高清截图
-- 保存到 `screenshots/slides/` 文件夹
+### 核心观点展示
+![核心观点展示](screenshots/slides/slide-04.png)
+*分析做自媒体视频账号的三大痛点*
 
-### 📋 PPT页面内容概览
+### 解决方案流程
+![解决方案流程](screenshots/slides/slide-06.png)
+*展示科学完整的创作流程*
 
-| 页面 | 主要内容 | 亮点功能 |
-|------|----------|----------|
-| **第1页** | 🎤 开场 - 用Cursor赋能视频创作 | 炫酷的科技风主题 |
-| **第4页** | 📊 三大痛点 - 做自媒体视频账号的困境 | 问题分析可视化 |
-| **第6页** | 🔄 创作流程 - 科学完整的创作流程 | 流程图交互展示 |
-| **第8页** | 🎯 应用场景 - Cursor赋能视频创作的五大场景 | 核心价值展示 |
-| **第17页** | 📞 联系方式与二维码 | 完整联系信息 |
+### 实战应用场景
+![实战应用场景](screenshots/slides/slide-08.png)
+*Cursor能赋能视频创作的五大核心应用场景*
 
-> 🚀 **一键生成截图**: 运行截图脚本后，这里将自动显示所有页面的高清预览图！  
-> 📖 **详细指南**: 查看 [SCREENSHOT_GUIDE.md](SCREENSHOT_GUIDE.md) 了解如何快速生成截图
+### 📊 完整页面列表
+
+<details>
+<summary>📋 点击展开查看所有15页截图</summary>
+
+| ![第1页](screenshots/slides/slide-01.png) |
+|:---:|
+| **第1页** - [slide-01.png](screenshots/slides/slide-01.png) |
+
+| ![第2页](screenshots/slides/slide-02.png) |
+|:---:|
+| **第2页** - [slide-02.png](screenshots/slides/slide-02.png) |
+
+| ![第3页](screenshots/slides/slide-03.png) |
+|:---:|
+| **第3页** - [slide-03.png](screenshots/slides/slide-03.png) |
+
+| ![第4页](screenshots/slides/slide-04.png) |
+|:---:|
+| **第4页** - [slide-04.png](screenshots/slides/slide-04.png) |
+
+| ![第5页](screenshots/slides/slide-05.png) |
+|:---:|
+| **第5页** - [slide-05.png](screenshots/slides/slide-05.png) |
+
+| ![第6页](screenshots/slides/slide-06.png) |
+|:---:|
+| **第6页** - [slide-06.png](screenshots/slides/slide-06.png) |
+
+| ![第7页](screenshots/slides/slide-07.png) |
+|:---:|
+| **第7页** - [slide-07.png](screenshots/slides/slide-07.png) |
+
+| ![第8页](screenshots/slides/slide-08.png) |
+|:---:|
+| **第8页** - [slide-08.png](screenshots/slides/slide-08.png) |
+
+| ![第9页](screenshots/slides/slide-09.png) |
+|:---:|
+| **第9页** - [slide-09.png](screenshots/slides/slide-09.png) |
+
+| ![第10页](screenshots/slides/slide-10.png) |
+|:---:|
+| **第10页** - [slide-10.png](screenshots/slides/slide-10.png) |
+
+| ![第11页](screenshots/slides/slide-11.png) |
+|:---:|
+| **第11页** - [slide-11.png](screenshots/slides/slide-11.png) |
+
+| ![第12页](screenshots/slides/slide-12.png) |
+|:---:|
+| **第12页** - [slide-12.png](screenshots/slides/slide-12.png) |
+
+| ![第13页](screenshots/slides/slide-13.png) |
+|:---:|
+| **第13页** - [slide-13.png](screenshots/slides/slide-13.png) |
+
+| ![第14页](screenshots/slides/slide-14.png) |
+|:---:|
+| **第14页** - [slide-14.png](screenshots/slides/slide-14.png) |
+
+| ![第15页](screenshots/slides/slide-15.png) |
+|:---:|
+| **第15页** - [slide-15.png](screenshots/slides/slide-15.png) |
+
+</details>
+
+> 💡 **提示**: 点击图片可以查看高清版本。所有截图都采用1920x1080分辨率，完美展示了Cursor制作PPT的专业效果。
+
+### 🎯 如何更新截图？
+
+如果您修改了PPT内容，可以：
+1. 运行 `capture-slides.js` 重新生成截图
+2. 运行 `node update-readme-with-screenshots.js` 更新README
+3. 提交更改：`git add . && git commit -m "📸 更新PPT截图" && git push`
 
 
 ## 🚀 快速开始
