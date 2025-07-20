@@ -46,6 +46,28 @@
 
 🎯 **核心价值**：用这个项目证明了 **Cursor 不仅能写代码，更能创造出远超传统PPT的演示体验**！
 
+## 📸 PPT 效果预览
+
+以下是PPT的部分页面效果（[查看完整17页截图](screenshots/slides/)）：
+
+### 开场页面
+![PPT开场](screenshots/slides/slide-01.png)
+*用Cursor赋能视频创作 - 北京Meetup现场演示*
+
+### 核心观点展示
+![三大痛点](screenshots/slides/slide-04.png)
+*分析做自媒体视频账号的三大痛点*
+
+### 解决方案流程
+![创作流程](screenshots/slides/slide-06.png)
+*展示科学完整的创作流程*
+
+### 实战应用场景
+![应用场景](screenshots/slides/slide-08.png)
+*Cursor能赋能视频创作的五大核心应用场景*
+
+> 💡 **提示**: 点击图片可以查看高清版本。所有17页截图都采用1920x1080分辨率，完美展示了Cursor制作PPT的专业效果。
+
 ## 🚀 快速开始
 
 ### 直接使用
@@ -95,12 +117,17 @@ cursor-ppt-presentation/
 ├── CHANGELOG.md                    # 📝 版本记录 - 记录Cursor开发历程
 ├── CONTRIBUTING.md                 # 🤝 贡献指南 - 欢迎更多Cursor创作案例
 ├── package.json                    # 📦 项目配置
+├── capture-slides.js               # 📸 自动截图脚本 - 批量生成PPT页面截图
 ├── .github/                        # 🐛 GitHub配置
 │   └── ISSUE_TEMPLATE/
-└── screenshots/                    # 📸 演示截图
-    ├── overview.png                # 项目总览
-    ├── edit-mode.png               # 编辑模式展示
-    └── presentation.gif            # 动态演示
+└── screenshots/                    # 📸 演示资源
+    ├── README.md                   # 截图说明文档
+    └── slides/                     # PPT页面截图集合
+        ├── README.md               # 截图使用指南
+        ├── slide-01.png            # 第1页：开场
+        ├── slide-02.png            # 第2页：互动问题
+        ├── ...                     # 更多页面截图
+        └── slide-17.png            # 第17页：联系方式
 ```
 
 ## 🛠️ 实现方式
